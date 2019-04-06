@@ -44,3 +44,22 @@ func contactHSS(IMSI string, networkID string, networkType string) (string, stri
 
 	return RAND, AUTN, xres, kausd, nil
 }
+
+func contactServer(Kausd string) error {
+	resp, err := http.PostForm("http://127.0.0.1:8085/key",
+		url.Values{
+			"Kausd": {Kausd},
+		})
+	if err != nil {
+		return errors.New("fail to connect volte service")
+	}
+
+	_, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return errors.New("fail to connect volte service")
+	}
+
+	_ =  resp.Body.Close()
+
+	return nil
+}

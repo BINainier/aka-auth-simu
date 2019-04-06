@@ -17,6 +17,7 @@ func Run(port string) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/register", registerHandler)
 	mux.HandleFunc("/authorization", authorizationHandler)
+
 	err := http.ListenAndServe(":" + port, mux)
 	if err != nil {
 		fmt.Println("bind error")
@@ -26,12 +27,18 @@ func Run(port string) {
 
 func authorizationHandler(w http.ResponseWriter, r *http.Request){
 	_ = r.ParseForm()
-	RES := r.Form["RES"][0]
+	RES, found := r.Form["RES"]
+	if found {
+		if compareRES(RES[0], XRES) {
+			//给service  K
+			_ = contactServer(Kausd)
 
-	if compareRES(RES, XRES) {
-		authInfo := []byte("200")
-		_, _ = w.Write(authInfo)
+			v := url.Values{}
+			v.Set("Kausd", Kausd)
+			_, _ = w.Write([]byte(v.Encode()))
+		}
 	}
+
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {

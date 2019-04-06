@@ -6,30 +6,33 @@ import (
 	"net/url"
 )
 
-func verify(IMSI string) bool {
+func verify(IMSI string) string {
 	RAND, AUTN :=getRandAutn(IMSI)
 	RES := genRES(RAND, AUTN)
 
 	return sendRES(RES)
 }
 
-func sendRES(RES string) bool {
+func sendRES(RES string) string {
 	resp, err := http.PostForm("http://127.0.0.1:8083/authorization",
 		url.Values{"RES": {RES}},
 	)
 	if err != nil {
-		return false
+		return ""
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return false
-	}
-	response := string(body)
-	if response == "200" {
-		return true
+		return ""
 	}
 
-	return false
+	response, err := url.ParseQuery(string(body))
+	if err != nil {
+		return ""
+	}
+
+	Kausd := response.Get("Kausd")
+
+	return Kausd
 }
 
 func getRandAutn(IMSI string) (string,string) {

@@ -32,19 +32,21 @@ func righthandler(w http.ResponseWriter, r *http.Request){
 
 func handler(w http.ResponseWriter, r *http.Request){
 	_ = r.ParseForm()
-	IMSI := r.Form["IMSI"][0]
-	networkID := r.Form["networkID"][0]
-	networkType := r.Form["networkType"][0]
+	IMSI, found1 := r.Form["IMSI"]
+	networkID, found2 := r.Form["networkID"]
+	networkType, found3 := r.Form["networkType"]
 	//fmt.Println(IMSI, networkID,networkType)
 
-	RAND, AUTN, XRES, Kausd := genXRES(IMSI, networkID, networkType)
+	if found1 && found2 && found3 {
+		RAND, AUTN, XRES, Kausd := genXRES(IMSI[0], networkID[0], networkType[0])
 
-	v := url.Values{}
-	v.Set("RAND", RAND)
-	v.Add("AUTN", AUTN)
-	v.Add("XRES", XRES)
-	v.Add("Kausd", Kausd)
-	_, _ = w.Write([]byte(v.Encode()))
+		v := url.Values{}
+		v.Set("RAND", RAND)
+		v.Add("AUTN", AUTN)
+		v.Add("XRES", XRES)
+		v.Add("Kausd", Kausd)
+		_, _ = w.Write([]byte(v.Encode()))
+	}
 }
 
 func genXRES(IMSI string, networkID string, networkType string) (string, string, string, string) {
